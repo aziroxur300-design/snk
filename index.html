@@ -1,0 +1,584 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>SHIGANSHINA LEGACY</title>
+<style>
+:root{--bg:#0c0e11;--panel:#171c20;--panel2:#20272d;--line:#39434b;--text:#edf2f4;--muted:#aab4ba;--accent:#c89b54;--danger:#b84d4d;--good:#67a96b;--titan:#8b3a3a}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:radial-gradient(circle at top,#232a30 0,#101316 55%,#0a0c0e 100%);color:var(--text);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;overflow:hidden}
+button,input,select{font:inherit}
+button{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:12px;padding:12px 14px;cursor:pointer}
+button:active{transform:scale(.98)}
+button:disabled{opacity:.4;cursor:not-allowed}
+button.primary{background:linear-gradient(135deg,#b98b4b,#8b6736);border-color:#d8ae6c;color:#1a1206;font-weight:700}
+button.danger{background:#653334}
+button.titan{background:linear-gradient(135deg,#5c2323,#8b3a3a);border-color:#c1615c}
+button.wide{width:100%;text-align:center;margin-top:8px}
+.hidden{display:none!important}
+
+/* ---- Écran titre ---- */
+#titleScreen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;background:radial-gradient(circle at 50% 30%,#2a333a 0,#0c0e11 65%)}
+#titleScreen h1{font-size:clamp(30px,8vw,50px);letter-spacing:4px;margin:0;color:var(--accent);text-shadow:0 0 30px #c89b5455}
+#titleScreen h1 span{display:block;font-size:.5em;letter-spacing:8px;color:var(--text);margin-top:4px}
+#titleScreen .tagline{color:var(--muted);margin:14px 0 30px;font-size:14px;max-width:360px}
+#titleScreen .titlebtns{display:flex;flex-direction:column;gap:10px;width:min(320px,80vw)}
+#titleScreen button{padding:16px}
+.foot{position:absolute;bottom:14px;left:0;right:0;text-align:center;color:#6b747a;font-size:10.5px;padding:0 16px}
+
+/* ---- Écran création ---- */
+#createScreen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto}
+.createCard{width:min(420px,100%);background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:22px;box-shadow:0 20px 50px #000a}
+.createCard h2{margin:0 0 4px;letter-spacing:1px;color:var(--accent);font-size:20px}
+.createCard .sub{margin:0 0 16px}
+.form{display:grid;gap:10px}
+.form input,.form select{width:100%;padding:13px;border-radius:12px;border:1px solid var(--line);background:#0d1012;color:var(--text)}
+
+/* ---- App ---- */
+#app{position:fixed;inset:0;display:flex;flex-direction:column}
+.appbar{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:#12161acc;border-bottom:1px solid var(--line);backdrop-filter:blur(6px)}
+.appbar .who b{display:block;font-size:15px}
+.appbar .who .sub{font-size:11px;margin:0}
+.appbar .res{text-align:right;font-size:12px;color:var(--muted);display:flex;gap:10px}
+#tabContent{flex:1;overflow-y:auto;padding:14px 14px 90px}
+.tabbar{position:fixed;left:0;right:0;bottom:0;display:flex;background:#12161aee;border-top:1px solid var(--line);backdrop-filter:blur(6px);padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+.tabbtn{flex:1;background:transparent;border:none;border-radius:12px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:19px;padding:6px 0;color:var(--muted)}
+.tabbtn small{font-size:10px;letter-spacing:.3px}
+.tabbtn.active{color:var(--accent);background:#c89b5416}
+
+/* ---- Story ---- */
+.storycard{border-radius:18px;border:1px solid #4a5359;background:linear-gradient(180deg,#2a323a,#171c20 80%);padding:20px;min-height:70vh;display:flex;flex-direction:column}
+.storycard.freeroam{min-height:auto}
+.placeName{font-size:22px;font-weight:800;letter-spacing:.5px;margin-bottom:10px}
+.storytext{line-height:1.6;color:#dde3e5;font-size:15px;flex:1}
+.choices.big{display:grid;gap:10px;margin-top:18px}
+.choices.big button{padding:15px;text-align:left;font-size:14.5px;border-radius:14px}
+.choices.big button:hover{border-color:var(--accent)}
+.chapterbtn{margin-top:16px;padding:16px;font-weight:700;letter-spacing:.3px;box-shadow:0 8px 20px #00000055}
+.quickactions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
+
+/* ---- Cards générales (autres onglets) ---- */
+.card{background:#151a1eee;border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px;box-shadow:0 6px 18px #0004}
+.card h3{margin:0 0 8px;font-size:15px;color:var(--accent)}
+.sub{color:var(--muted);font-size:12.5px;margin:0 0 8px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.stat{background:#0d1012;border:1px solid var(--line);padding:9px;border-radius:10px}
+.statTop{display:flex;justify-content:space-between;font-size:12px}
+.bar{height:6px;background:#2b3338;border-radius:99px;overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;background:var(--accent)}
+.bar i.titanbar{background:var(--titan)}
+.item{display:flex;justify-content:space-between;align-items:center;gap:8px;background:#0d1012;padding:9px;border-radius:10px;border:1px solid var(--line);margin-bottom:6px}
+.rowbtns{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.mapgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.placebtn{min-height:64px;text-align:left;display:flex;flex-direction:column;justify-content:center}
+.placebtn.here{border-color:var(--accent);background:#c89b5422}
+.placebtn small{color:var(--muted)}
+
+/* ---- Modal (popups secondaires) ---- */
+.modal{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;padding:14px;z-index:20}
+.modal.show{display:flex}
+.modalBox{width:min(480px,100%);max-height:85vh;overflow:auto;background:#151a1e;border:1px solid #58636a;border-radius:18px;padding:16px}
+.choices{display:grid;gap:8px;margin-top:12px}
+.notice{padding:10px;border-radius:10px;background:#272014;border:1px solid #5d4b2e;color:#ead9b7;margin-bottom:10px}
+.notice.titan{background:#2a1414;border-color:#7a3a3a;color:#f0c9c6}
+.log p{margin:0 0 8px;padding-bottom:8px;border-bottom:1px solid #2a3034;font-size:13px;line-height:1.4}
+</style>
+</head>
+<body>
+
+<div id="titleScreen">
+<div>
+<h1>SHIGANSHINA<span>LEGACY</span></h1>
+<p class="tagline">Un soldat, mille destins. Chaque choix façonne ton karma et ta fin.</p>
+<div class="titlebtns">
+<button class="primary" onclick="showCreateScreen()">Commencer mon histoire</button>
+<button id="continueBtn" class="hidden" onclick="loadGame()">Continuer</button>
+</div>
+</div>
+<div class="foot">Fan-game non officiel, univers et personnages originaux.</div>
+</div>
+
+<div id="createScreen" class="hidden"></div>
+
+<div id="app" class="hidden"></div>
+
+<div class="modal" id="modal"><div class="modalBox" id="modalBox"></div></div>
+
+<script>
+const KEY="shiganshina_rp_v3";
+let activeTab="story";
+let G={
+started:false,name:"",age:17,origin:"Habitant",place:"Porte Sud",day:1,time:7,
+hp:100,maxhp:100,stamina:100,maxstamina:100,xp:0,level:1,money:80,
+force:4,agility:4,intel:4,courage:4,reputation:0,moral:70,
+equipment:"Tenue civile",weapon:"Aucun",mission:null,quest:null,
+relations:{Elias:0,Mira:0,Kael:0,Toma:0},inventory:["Pain","Gourde"],log:[],
+corps:null,skillPoints:0,perks:{precision:0,endurance:0,sangfroid:0,regen:0,instinct:0},
+titanQuest:0,titan:{unlocked:false,active:false,energy:100,maxenergy:100,mass:1,kills:0},
+daily:{day:1,train:0,explore:0,talk:0,claimed:[]},
+currentScene:null,flags:{metElias:false,metMira:false,titanKnown:false,loyalty:0,savedComrade:false,comradeHurt:false,retreated:false,ch3Done:false,ch3Alert:false,finaleDone:false,rivalToma:null,firstKillDone:false,disparitionDone:false,rescuedMissing:false,abandonedMissing:false,hardened:null}
+};
+
+const places={
+"Place Centrale":["Marché","Boulangerie","Rue des artisans"],
+"Porte Sud":["Poste de garde","Remparts","Casernes"],
+"Quartier Militaire":["Salle d'entraînement","Bureau des missions","Dortoir"],
+"Rue des artisans":["Forge","Tailleur","Atelier"],
+"Marché":["Marchand","Petite taverne","Ruelle"],
+"Remparts":["Tour de guet","Plateforme","Escalier du mur"],
+"Forêt extérieure":["Sentier","Camp abandonné","Clairière"]
+};
+
+const RANKS=[[1,"Recrue"],[3,"Soldat"],[6,"Soldat Confirmé"],[10,"Caporal"],[15,"Sergent"],[22,"Capitaine"],[30,"Commandant"]];
+function rankTitle(){let t=RANKS[0][1];for(const r of RANKS){if(G.level>=r[0])t=r[1]}return t}
+
+const CORPS_DATA={
+"Garnison":{desc:"Défense des murs. +25 PV max, missions plus sûres.",apply:()=>{G.maxhp+=25;G.hp=G.maxhp}},
+"Bataillon de Reconnaissance":{desc:"Expéditions extérieures. +2 Agilité, +15 Endurance max, avantage face aux titans.",apply:()=>{G.agility+=2;G.maxstamina+=15;G.stamina=G.maxstamina}},
+"Police Militaire":{desc:"Ordre intérieur. +40₤, réputation renforcée.",apply:()=>{G.money+=40;G.reputation+=2}}
+};
+
+const PERK_DATA={
+precision:{name:"Frappe précise",desc:"+7% de réussite en mission par niveau."},
+endurance:{name:"Endurance de fer",desc:"-5 endurance au coût d'entraînement par niveau."},
+sangfroid:{name:"Sang-froid",desc:"-10% de dégâts subis par niveau."},
+regen:{name:"Régénération",desc:"+2 endurance récupérée par avancée horaire, par niveau."},
+instinct:{name:"Instinct tactique",desc:"+2 en calcul de réussite/combat par niveau."}
+};
+
+/* ---- Moteur d'histoire à choix (affiché en plein écran, plus en popup) ---- */
+const STORY={
+ch0_start:{text:"Avant Shiganshina, il y a eu ton enfance. Un souvenir te revient, net comme si c'était hier.",choices:[
+ {label:"Le jour où un titan a détruit ton village",next:"ch0_trauma1",effects:g=>{g.courage+=1}},
+ {label:"Le jour où tu as vu un soldat sauver quelqu'un",next:"ch0_trauma2",effects:g=>{g.intel+=1}}
+]},
+ch0_trauma1:{text:"Tu te souviens du feu, des cris, de la poussière. Tu as survécu, mais quelque chose en toi a changé ce jour-là.",choices:[
+ {label:"« Je ne serai plus jamais impuissant·e. »",next:"ch1_arrival",effects:g=>{g.flags.loyalty-=1;g.quest="Ton passé pèse sur chacun de tes pas."}}
+]},
+ch0_trauma2:{text:"Ce soldat, couvert de sang mais souriant, t'a tendu la main. Depuis ce jour, tu rêves de porter cet uniforme.",choices:[
+ {label:"« Je veux devenir comme lui. »",next:"ch1_arrival",effects:g=>{g.flags.loyalty+=1;g.quest="Ton passé pèse sur chacun de tes pas."}}
+]},
+ch1_arrival:{text:"Ton premier jour à Shiganshina commence par une agitation inhabituelle près de la porte principale. Des gardes s'affairent autour d'un blessé qu'on vient de ramener.",choices:[
+ {label:"Aller voir ce qu'il se passe",next:"ch1_crowd"},
+ {label:"Éviter la foule et rejoindre le quartier militaire",next:"ch1_quiet"}
+]},
+ch1_crowd:{text:"Tu t'approches. Le blessé est un jeune garde à peine plus âgé que toi, visiblement épuisé par une patrouille qui a mal tourné.",choices:[
+ {label:"Proposer ton aide",next:"ch1_help",effects:g=>{g.relations.Elias+=3;g.flags.metElias=true}},
+ {label:"Rester en retrait et observer la scène",next:"ch1_observe",effects:g=>{g.intel+=1}}
+]},
+ch1_help:{text:"Tu aides à le porter jusqu'au poste de garde. Entre deux grimaces de douleur, il te remercie et te dit s'appeler Elias.",choices:[
+ {label:"« C'est normal, prends soin de toi. »",effects:g=>{g.moral=Math.min(100,g.moral+5);g.quest="Rends visite à Elias au poste de garde."}}
+]},
+ch1_observe:{text:"Tu remarques que sa blessure ressemble davantage à une brûlure qu'à une coupure. Étrange, pour une simple patrouille urbaine.",choices:[
+ {label:"Garder cette observation pour toi",effects:g=>{g.quest="Une rumeur circule sur d'étranges blessures. Renseigne-toi en ville."}}
+]},
+ch1_quiet:{text:"Tu évites la foule. Dans une cour tranquille du quartier militaire, une mécanicienne répare un harnais avec une concentration absolue.",choices:[
+ {label:"L'aborder",next:"ch1_mira",effects:g=>{g.relations.Mira+=3;g.flags.metMira=true}},
+ {label:"Continuer ton chemin",effects:g=>{g.quest="Découvre la ville et fais ta première rencontre."}}
+]},
+ch1_mira:{text:"Elle lève les yeux, surprise, puis te sourit. « Tu t'intéresses à l'équipement ? Je suis Mira. Reviens me voir si tu veux apprendre. »",choices:[
+ {label:"« Avec plaisir. »",effects:g=>{g.moral=Math.min(100,g.moral+5);g.quest="Rends visite à Mira dans le quartier militaire."}}
+]},
+ch2_intro:{text:"Un vétéran au regard perçant t'arrête alors que tu traverses la place. « Le temps est venu de choisir ta voie, recrue. Ce choix déterminera comment tu serviras ces murs. »",choices:[
+ {label:"« Je suis prêt. »",action:()=>corpsCeremony()}
+]},
+ch2_after:{text:"Kael, l'officier qui supervise ton affectation, te regarde signer les derniers papiers. « Reste à savoir quel genre de soldat tu seras : celui qui suit les ordres à la lettre, ou celui qui écoute sa propre tête. »",choices:[
+ {label:"« Je suivrai les ordres, quoi qu'il arrive. »",next:"ch2_rival",effects:g=>{g.flags.loyalty+=2;g.relations.Kael+=2;g.quest="Prouve ta discipline sur le terrain."}},
+ {label:"« Je ferai ce qui me semble juste. »",next:"ch2_rival",effects:g=>{g.flags.loyalty-=2;g.courage+=1;g.quest="Trouve ta propre voie, quitte à déplaire."}}
+]},
+ch2_rival:{text:"À l'entraînement, un autre jeune soldat du nom de Toma te met au défi devant tout le monde. « Voyons ce que vaut la nouvelle recrue. »",choices:[
+ {label:"Accepter et te donner à fond pour gagner",resolve:g=>{let chance=45+g.force*4+g.agility*3;return(Math.random()*100<chance)?"ch2_rival_win":"ch2_rival_lose"}},
+ {label:"Accepter mais rester mesuré, sans l'humilier",next:"ch2_rival_respect"}
+]},
+ch2_rival_win:{text:"Tu prends le dessus sans effort apparent. Toma serre les dents, visiblement vexé devant les autres recrues.",effectsOnEnter:g=>{g.relations.Toma-=3;g.flags.rivalToma="rival";g.reputation+=2},choices:[{label:"Continuer"}]},
+ch2_rival_lose:{text:"Toma te met au tapis sans ménagement. Les rires fusent, mais il te tend la main pour t'aider à te relever. « Pas mal, pour une recrue. »",effectsOnEnter:g=>{g.relations.Toma+=2;g.flags.rivalToma="ally";g.moral=Math.max(0,g.moral-3)},choices:[{label:"Continuer"}]},
+ch2_rival_respect:{text:"Tu combats avec sérieux mais sans chercher à l'humilier, même quand l'occasion se présente. Toma semble surpris par ce geste inhabituel.",effectsOnEnter:g=>{g.relations.Toma+=4;g.flags.rivalToma="ally";g.reputation+=1},choices:[{label:"Continuer"}]},
+ch3_start:{text:g=>`Ta première expédition hors des murs commence à l'aube. Kael commande la formation et te place en flanc arrière, aux côtés de ${comradeName(g)}, visiblement nerveux.`,choices:[
+ {label:"Rester concentré sur la formation",next:"ch3_attack"},
+ {label:"Observer discrètement les alentours",next:"ch3_attack",effects:g=>{g.flags.ch3Alert=true;g.intel+=1}}
+]},
+ch3_attack:{text:g=>`Un craquement retentit dans les arbres. Une silhouette massive surgit soudain, à quelques mètres de ${comradeName(g)}, tétanisé de peur.`,choices:[
+ {label:"Foncer protéger ton camarade",resolve:g=>{let chance=40+g.courage*4+g.agility*3+(g.flags.ch3Alert?15:0);return(Math.random()*100<chance)?"ch3_save_success":"ch3_save_fail"}},
+ {label:"Ordonner le repli et couvrir la retraite",next:"ch3_retreat",effects:g=>{g.flags.retreated=true}}
+]},
+ch3_save_success:{text:g=>`Tu interceptes la créature à temps et tranches sa nuque d'un geste précis. ${comradeName(g)}, sain et sauf, te regarde avec un mélange de choc et de gratitude. Kael hoche la tête, impressionné.`,effectsOnEnter:g=>{g.relations.Kael+=3;if(g.flags.rivalToma)g.relations.Toma+=4;g.reputation+=4;g.moral=Math.min(100,g.moral+8);g.flags.savedComrade=true;g.flags.ch3Done=true;g.flags.firstKillDone=true;g.titanQuest=Math.max(g.titanQuest,1);g.quest="Un étrange fragment est resté accroché à la nuque du titan."},choices:[
+ {label:"Ramasser le fragment cristallin sur le corps",effects:g=>{log("Tu récupères un fragment cristallin, glacé malgré la chaleur du combat.")}}
+]},
+ch3_save_fail:{text:g=>`Tu interviens, mais trop tard : ${comradeName(g)} est sérieusement blessé avant que tu ne repousses la créature. Kael te lance un regard dur mais ne dit rien.`,effectsOnEnter:g=>{g.relations.Kael+=1;if(g.flags.rivalToma)g.relations.Toma+=1;g.moral=Math.max(0,g.moral-10);g.flags.comradeHurt=true;g.flags.ch3Done=true;g.flags.firstKillDone=true;g.titanQuest=Math.max(g.titanQuest,1);g.quest="La culpabilité te pèse, mais un fragment cristallin trouvé sur place intrigue Kael."},choices:[
+ {label:"Ramasser le fragment cristallin sur le corps",effects:g=>{log("Tu ramasses le fragment en silence, encore secoué.")}}
+]},
+ch3_retreat:{text:"Tu donnes l'ordre de repli. La formation recule en bon ordre et tout le monde rentre vivant — mais le silence est pesant sur le chemin du retour. Certains murmurent que tu as fui plutôt que combattu.",effectsOnEnter:g=>{g.relations.Kael-=1;g.reputation=Math.max(0,g.reputation-2);g.flags.ch3Done=true;g.quest="Ta première expédition s'est terminée dans le doute."},choices:[
+ {label:"Assumer ta décision",effects:g=>{log("Tu tiens ta décision : rentrer vivants valait mieux qu'un héroïsme inutile.")}}
+]},
+chFK_reflect:{text:"C'est fait. Ta lame a tranché une nuque pour la première fois. Le corps s'effondre, et avec lui, quelque chose en toi.",choices:[
+ {label:"Laisser la culpabilité s'exprimer",effects:g=>{g.moral=Math.max(0,g.moral-5);g.flags.hardened=false;g.quest="Apprends à vivre avec ce que tu as fait."}},
+ {label:"Enfouir ça et t'endurcir",effects:g=>{g.courage+=1;g.flags.hardened=true;g.quest="Tu avances, sans regarder en arrière."}}
+]},
+ch4_reveal:{text:"Le pouvoir est en toi désormais. Reste à savoir ce que tu en fais.",choices:[
+ {label:"En parler ouvertement à ton entourage",effects:g=>{g.flags.titanKnown=true;g.reputation+=3;g.moral=Math.max(0,g.moral-3);g.quest="Assume ton pouvoir aux yeux de tous."}},
+ {label:"Le garder secret pour l'instant",effects:g=>{g.flags.titanKnown=false;g.moral=Math.max(0,g.moral-5);g.quest="Garde ton secret... pour combien de temps encore ?"}}
+]},
+chD_start:{text:g=>`Au retour d'une mission de reconnaissance, on découvre que ${missingPersonName(g)} n'est jamais rentré·e. L'état-major déclare la zone trop dangereuse pour organiser des recherches.`,choices:[
+ {label:"Enfreindre les ordres et partir seul·e à sa recherche",resolve:g=>{let chance=35+g.courage*3+g.agility*3+(g.corps==="Bataillon de Reconnaissance"?15:0);return(Math.random()*100<chance)?"chD_found":"chD_lost"},effects:g=>{g.flags.loyalty-=2}},
+ {label:"Respecter la décision de l'état-major",next:"chD_abandon",effects:g=>{g.flags.loyalty+=2}}
+]},
+chD_found:{text:g=>`Tu retrouves ${missingPersonName(g)} de justesse, épuisé·e mais vivant·e, retranché·e derrière un rocher. Il/elle pleure de soulagement en te voyant apparaître.`,effectsOnEnter:g=>{let n=missingPersonName(g);g.relations[n]+=6;g.reputation+=3;g.flags.disparitionDone=true;g.flags.rescuedMissing=true;g.moral=Math.min(100,g.moral+10)},choices:[{label:"Le/la ramener au bercail"}]},
+chD_lost:{text:g=>`Tu ne retrouves que des traces de lutte. ${missingPersonName(g)} reste introuvable. Tu rentres seul·e, les mains vides et le cœur brisé.`,effectsOnEnter:g=>{let n=missingPersonName(g);g.relations[n]-=4;g.flags.disparitionDone=true;g.flags.abandonedMissing=true;g.moral=Math.max(0,g.moral-15)},choices:[{label:"Continuer malgré tout"}]},
+chD_abandon:{text:g=>`Tu obéis. ${missingPersonName(g)} est déclaré·e perdu·e quelques jours plus tard. Une partie de toi se demandera toujours « et si... ».`,effectsOnEnter:g=>{let n=missingPersonName(g);g.relations[n]-=6;g.flags.disparitionDone=true;g.flags.abandonedMissing=true;g.moral=Math.max(0,g.moral-8)},choices:[{label:"Vivre avec ce choix"}]},
+ch5_start:{text:"Une convocation inattendue t'amène devant un officier supérieur. Ce qu'il s'apprête à te demander pourrait définir le reste de ta carrière... et ta conscience.",choices:[
+ {label:"Se présenter",next:"ch5_choice"}
+]},
+ch5_choice:{text:"L'officier t'explique qu'un rapport dérangeant sur les pertes de la dernière expédition doit être étouffé pour ne pas alarmer la population. Il te demande ta discrétion... ou ta signature sur un faux rapport.",choices:[
+ {label:"Obéir et couvrir le rapport",effects:g=>{g.flags.loyalty+=3;g.reputation+=2},action:()=>showEnding()},
+ {label:"Refuser et alerter tes proches",effects:g=>{g.flags.loyalty-=3;g.reputation=Math.max(0,g.reputation-3);g.moral=Math.min(100,g.moral+5)},action:()=>showEnding()}
+]}
+};
+function sceneText_(sc,g){return typeof sc.text==="function"?sc.text(g):sc.text}
+function scene(id){let sc=STORY[id];if(!sc){G.currentScene=null;render();return}if(sc.effectsOnEnter)sc.effectsOnEnter(G);G.currentScene=id;activeTab="story";render()}
+function chooseOption(i){let sc=STORY[G.currentScene];let c=sc.choices[i];if(c.effects)c.effects(G);if(c.action){G.currentScene=null;c.action();return}let next=c.resolve?c.resolve(G):c.next;if(next){scene(next)}else{G.currentScene=null;render()}}
+function comradeName(g){return g.flags.rivalToma?"Toma":"Dana"}
+function missingPersonName(g){if(g.flags.rivalToma)return"Toma";let rel=Object.entries(g.relations).filter(([n])=>n!=="Toma").sort((a,b)=>b[1]-a[1])[0];return rel[0]}
+
+const MICRO_EVENTS=[
+{text:"Un enfant en larmes te demande de l'aide : son chat s'est réfugié sur une corniche près des remparts.",choices:[
+ {label:"Aider à récupérer le chat (1h)",effects:g=>{advance(1);g.reputation++;g.moral=Math.min(100,g.moral+4);log("Tu récupères le chat sous les applaudissements de quelques passants.")}},
+ {label:"Continuer ta route",effects:g=>{g.moral=Math.max(0,g.moral-2);log("Tu t'éloignes, un peu mal à l'aise.")}}
+]},
+{text:"Deux marchands se disputent violemment au sujet d'une dette impayée.",choices:[
+ {label:"Intervenir pour calmer les esprits",effects:g=>{g.reputation++;g.stamina=Math.max(0,g.stamina-10);log("Ton intervention apaise la dispute. Les marchands te remercient.")}},
+ {label:"Ignorer et poursuivre ton chemin",effects:g=>{log("Tu laisses la dispute se régler sans toi.")}}
+]},
+{text:"Un vétéran éméché propose de te confier un secret sur les créatures qui rôdent hors des murs, contre quelques pièces.",choices:[
+ {label:"Payer 20₤ pour écouter",effects:g=>{if(g.money>=20){g.money-=20;g.intel++;log("Le vétéran murmure des détails troublants sur les titans. Ton intelligence en ressort aiguisée.")}else{log("Tu n'as pas assez d'argent, il hausse les épaules et s'éloigne.")}}},
+ {label:"Refuser, méfiant",effects:g=>{g.courage++;log("Tu déclines poliment. Mieux vaut ne pas se fier à n'importe qui.")}}
+]},
+{text:"Un soldat blessé, allongé contre un mur, te tend la main en silence.",choices:[
+ {label:"Utiliser un bandage si tu en as",effects:g=>{let idx=g.inventory.indexOf("Bandage");if(idx>=0){g.inventory.splice(idx,1);g.reputation++;g.moral=Math.min(100,g.moral+5);log("Tu soignes le soldat. Il te regarde avec gratitude.")}else{g.moral=Math.max(0,g.moral-3);log("Tu n'as rien pour l'aider et t'en veux un peu.")}}},
+ {label:"Aller chercher de l'aide",effects:g=>{advance(1);g.reputation++;log("Tu reviens avec un médecin militaire à temps.")}}
+]}
+];
+function microEvent(){let e=MICRO_EVENTS[Math.floor(Math.random()*MICRO_EVENTS.length)];window._micro=e;modal("Rencontre imprévue",`<div class=notice>${e.text}</div><div class=choices>${e.choices.map((c,i)=>`<button onclick="microChoice(${i})">${c.label}</button>`).join("")}</div>`)}
+function microChoice(i){let c=window._micro.choices[i];closeModal();c.effects(G);render()}
+
+function log(t){G.log.unshift(`<b>J${G.day} • ${String(G.time).padStart(2,"0")}h</b> — ${t}`);G.log=G.log.slice(0,30)}
+function esc(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
+function addXP(n){G.xp+=n;let need=70+G.level*45;if(G.xp>=need){G.xp-=need;G.level++;G.maxhp+=8;G.maxstamina+=7;G.hp=G.maxhp;G.stamina=G.maxstamina;G.skillPoints++;log(`Niveau ${G.level} atteint (${rankTitle()}). Un point de compétence est disponible.`)}}
+function advance(h=1){G.time+=h;if(G.time>=24){G.time-=24;G.day++;dailyEvent()} G.stamina=Math.min(G.maxstamina,G.stamina+8+G.perks.regen*2)}
+function dailyEvent(){G.daily={day:G.day,train:0,explore:0,talk:0,claimed:[]};G.titan.energy=Math.min(G.titan.maxenergy,G.titan.energy+25);if(Math.random()<.45){const e=["Un convoi traverse la ville.","La garnison annonce une nouvelle inspection.","Le marché est plus animé que d'habitude.","Un bruit étrange est signalé près des remparts."][Math.floor(Math.random()*4)];log(e)}}
+
+/* ================= INTERFACE ================= */
+function showCreateScreen(){
+document.getElementById("titleScreen").classList.add("hidden");
+let el=document.getElementById("createScreen");
+el.classList.remove("hidden");
+el.innerHTML=`<div class="createCard">
+<h2>Création du personnage</h2><p class="sub">Choisis qui tu étais avant de devenir soldat.</p>
+<div class="form">
+<input id=n placeholder="Prénom / nom" maxlength=24>
+<input id=a type=number min=13 max=40 value=17 placeholder="Âge">
+<select id=o><option>Habitant</option><option>Famille militaire</option><option>Marchand</option><option>Éclaireur en formation</option></select>
+<select id=p><option>Porte Sud</option><option>Place Centrale</option><option>Quartier Militaire</option></select>
+<button class="primary" onclick="finishCreate()">Entrer dans Shiganshina</button>
+</div></div>`;
+}
+function finishCreate(){
+let n=document.getElementById("n").value.trim();if(!n)return alert("Choisis un nom.");
+G.started=true;G.name=n;G.age=+document.getElementById("a").value;G.origin=document.getElementById("o").value;G.place=document.getElementById("p").value;
+if(G.origin==="Famille militaire"){G.force++;G.courage++;G.reputation=2}
+if(G.origin==="Marchand"){G.intel++;G.money+=50}
+if(G.origin==="Éclaireur en formation"){G.agility++;G.courage++;G.stamina+=10;G.maxstamina+=10}
+log(`Bienvenue à Shiganshina, ${esc(G.name)}.`);
+scene("ch0_start");
+}
+function switchTab(t){activeTab=t;render()}
+
+function render(){
+if(!G.started){
+document.getElementById("app").classList.add("hidden");
+if(!document.getElementById("createScreen").classList.contains("hidden")===false){}
+document.getElementById("continueBtn").classList.toggle("hidden",!localStorage.getItem(KEY));
+return;
+}
+document.getElementById("titleScreen").classList.add("hidden");
+document.getElementById("createScreen").classList.add("hidden");
+let app=document.getElementById("app");
+app.classList.remove("hidden");
+if(G.currentScene)activeTab="story";
+app.innerHTML=`
+<header class="appbar">
+<div class="who"><b>${esc(G.name)}</b><span class="sub">${rankTitle()} • Niv.${G.level}${G.titan.active?" • Forme Titan":""}</span></div>
+<div class="res"><span>📅 J${G.day} ${String(G.time).padStart(2,"0")}h</span><span>💰${G.money}₤</span></div>
+</header>
+<main id="tabContent">${tabContentHTML()}</main>
+<nav class="tabbar">
+${[["story","📖","Histoire"],["character","👤","Fiche"],["missions","⚔","Missions"],["inventory","🎒","Sac"],["map","🗺","Carte"]].map(([id,icon,label])=>`<button class="tabbtn ${activeTab===id?"active":""}" onclick="switchTab('${id}')">${icon}<small>${label}</small></button>`).join("")}
+</nav>`;
+}
+function tabContentHTML(){
+if(activeTab==="character")return characterTabHTML();
+if(activeTab==="missions")return missionsTabHTML();
+if(activeTab==="inventory")return inventoryTabHTML();
+if(activeTab==="map")return mapTabHTML();
+return storyTabHTML();
+}
+function storyTabHTML(){
+if(G.currentScene){
+let sc=STORY[G.currentScene];
+return `<div class="storycard"><div class="storytext">${sceneText_(sc,G)}</div><div class="choices big">${sc.choices.map((c,i)=>`<button onclick="chooseOption(${i})">${c.label}</button>`).join("")}</div></div>`;
+}
+return `<div class="storycard freeroam">
+<div class="placeName">📍 ${esc(G.place)}</div>
+<div class="storytext">${freeRoamText()}</div>
+${chapterTriggerHTML()}
+<div class="quickactions">
+<button onclick="explore()">🧭 Explorer</button>
+<button onclick="train()">🏋 S'entraîner</button>
+<button onclick="rest()">🌙 Se reposer</button>
+<button onclick="talk()">💬 Parler</button>
+</div>
+<button class="wide" onclick="openJournal()">📰 Journal</button>
+</div>`;
+}
+function freeRoamText(){
+if(G.quest)return `<b>Objectif :</b> ${esc(G.quest)}`;
+return "Les rues sont animées. Des soldats patrouillent, les marchands négocient et les remparts dominent l'horizon.";
+}
+function chapterTriggerHTML(){
+if(G.mission)return `<button class="chapterbtn primary wide" onclick="missionStep()">⚔ Continuer la mission : ${esc(G.mission.name)}</button>`;
+if(G.titanQuest===1)return `<button class="chapterbtn titan wide" onclick="meditate()">🔮 Méditer sur le fragment</button>`;
+if(G.level>=3&&!G.corps)return `<button class="chapterbtn primary wide" onclick="scene('ch2_intro')">🎖 Cérémonie d'affectation</button>`;
+if(G.corps&&G.level>=5&&!G.flags.ch3Done)return `<button class="chapterbtn primary wide" onclick="scene('ch3_start')">⚔ Chapitre : Première expédition</button>`;
+if(G.flags.ch3Done&&G.level>=8&&!G.flags.disparitionDone)return `<button class="chapterbtn primary wide" onclick="scene('chD_start')">🕯 Chapitre : Disparition</button>`;
+if(G.level>=10&&!G.flags.finaleDone)return `<button class="chapterbtn primary wide" onclick="scene('ch5_start')">🌌 Chapitre final : Le Choix</button>`;
+return "";
+}
+function characterTabHTML(){
+return `
+<div class="card"><h3>${esc(G.name)} — ${rankTitle()}</h3><p class="sub">Corps : ${G.corps?esc(G.corps):"Non affecté"} • Origine : ${G.origin}</p>${statHTML()}</div>
+<div class="card"><h3>Compétences</h3><p class="sub">Points disponibles : ${G.skillPoints}</p>${Object.keys(PERK_DATA).map(k=>`<div class=item><span>${PERK_DATA[k].name}</span><b>${G.perks[k]}/3</b></div>`).join("")}<button class="wide" onclick="skillsModal()">🎓 Améliorer</button></div>
+<div class="card"><h3>Pouvoir Titan</h3>${titanInfoHTML()}${G.titan.unlocked?'<button class="wide titan" onclick="titanPanelModal()">🧬 Gérer le pouvoir</button>':""}</div>
+<div class="card"><h3>Relations</h3>${Object.entries(G.relations).map(([n,v])=>`<div class=item><span>${n}</span><b>${v>0?"+":""}${v}</b></div>`).join("")}</div>
+${G.flags.finaleDone?'<button class="wide" onclick="showEnding()">📜 Revoir mon épilogue</button>':""}
+<div class="card"><h3>Sauvegarde</h3><div class="rowbtns"><button onclick="saveGame()">💾</button><button onclick="loadGame()">↩</button><button class="danger" onclick="resetGame()">⚠</button></div></div>
+`;
+}
+function missionsTabHTML(){
+return `
+<div class="card"><h3>Missions</h3>${G.mission?`<p class=sub>En cours : ${esc(G.mission.name)}</p><button class="wide primary" onclick="missionStep()">Continuer</button>`:`<button class="wide" onclick="missionBoard()">📜 Chercher une mission</button>`}</div>
+<div class="card"><h3>Quêtes quotidiennes</h3><button class="wide" onclick="dailyModal()">🎯 Voir les quêtes du jour</button></div>
+<div class="card"><h3>Arène</h3><button class="wide" onclick="arenaModal()">🥋 Défier un soldat</button></div>
+`;
+}
+function inventoryTabHTML(){
+return `<div class="card"><h3>Inventaire</h3>${G.inventory.length?G.inventory.map((x,i)=>`<div class=item><span>🎒 ${esc(x)}</span><button onclick="useItem(${i})">Utiliser</button></div>`).join(""):"<p class=sub>Inventaire vide</p>"}</div><button class="wide" onclick="shop()">🛒 Aller au marché</button>`;
+}
+function mapTabHTML(){
+return `<div class="card"><h3>Carte de Shiganshina</h3><div class="mapgrid">${Object.keys(places).map(p=>`<button class="placebtn ${p===G.place?"here":""}" onclick="travel('${p.replaceAll("'","\\\\'")}')"><b>📍 ${p}</b><small>${p===G.place?"Tu es ici — voir les zones":places[p].length+" zones"}</small></button>`).join("")}</div></div>`;
+}
+function openJournal(){modal("Journal",`<div class="log">${G.log.map(x=>`<p>${x}</p>`).join("")||"<p class=sub>Aucun événement.</p>"}</div><button class="wide" onclick="closeModal()">Fermer</button>`)}
+function titanInfoHTML(){
+if(!G.titan.unlocked){
+if(G.titanQuest===1)return `<p class=sub>Un fragment cristallin sommeille en toi depuis ta dernière victoire... Médite pour en apprendre plus.</p>`;
+return `<p class=sub>Pouvoir inconnu pour l'instant. Peut-être qu'un affrontement contre une créature titanesque révélera quelque chose.</p>`;
+}
+return `<div class=stat><div class=statTop><span>Énergie Titan</span><b>${Math.round(G.titan.energy)}/${G.titan.maxenergy}</b></div><div class=bar><i class=titanbar style="width:${G.titan.energy/G.titan.maxenergy*100}%"></i></div></div><p class=sub>Masse : ${G.titan.mass.toFixed(1)} • Titans vaincus : ${G.titan.kills}</p>`;
+}
+function statHTML(){
+let stats=[["PV",G.hp,G.maxhp],["Endurance",G.stamina,G.maxstamina],["Force",G.force,10],["Agilité",G.agility,10],["Intelligence",G.intel,10],["Courage",G.courage,10],["Réputation",G.reputation,20],["Moral",G.moral,100]];
+return `<div class=stats>${stats.map(s=>`<div class=stat><div class=statTop><span>${s[0]}</span><b>${Math.round(s[1])}/${s[2]}</b></div><div class=bar><i style="width:${Math.max(0,Math.min(100,s[1]/s[2]*100))}%"></i></div></div>`).join("")}</div><p class=sub>XP ${G.xp}/${70+G.level*45}</p>`;
+}
+function modal(title,body){document.getElementById("modalBox").innerHTML=`<h2>${title}</h2>${body}`;document.getElementById("modal").classList.add("show")}
+function closeModal(){document.getElementById("modal").classList.remove("show")}
+
+/* ================= Actions du monde ================= */
+function travel(p){if(p===G.place){subzones();return}G.place=p;advance(1);log(`Tu te rends à ${p}.`);postAction();render()}
+function subzones(){let arr=places[G.place]||[];modal(G.place,`<div class=choices>${arr.map(x=>`<button onclick="subzone('${x.replaceAll("'","\\\\'")}')">📍 ${x}</button>`).join("")}</div><br><button class="wide" onclick="closeModal()">Fermer</button>`)}
+function subzone(x){advance(1);log(`Tu explores ${x}.`);closeModal();if(x==="Poste de garde"&&G.reputation>=3){G.reputation++;log("Un garde te reconnaît et te laisse observer le tableau des affectations.")}postAction();render()}
+function explore(){advance(1);addXP(12);G.daily.explore++;let texts=["Tu observes les mouvements de la ville et repères plusieurs itinéraires.","Tu aides un commerçant à transporter une caisse.","Tu trouves une ruelle tranquille qui pourrait servir de raccourci.","Un soldat te donne un conseil sur les règles de circulation près des remparts."];log(texts[Math.floor(Math.random()*texts.length)]);postAction();render()}
+function train(){let cost=Math.max(5,25-G.perks.endurance*5);if(G.stamina<cost){log("Tu es trop fatigué pour t'entraîner.");render();return}advance(2);G.stamina-=cost;G.daily.train++;let r=Math.random();if(r<.34)G.force++;else if(r<.67)G.agility++;else G.courage++;addXP(30);log("Séance d'entraînement terminée. Une de tes aptitudes progresse.");render()}
+function rest(){advance(7);G.hp=G.maxhp;G.stamina=G.maxstamina;G.moral=Math.min(100,G.moral+8);G.titan.energy=Math.min(G.titan.maxenergy,G.titan.energy+40);log("Tu te reposes et récupères.");render()}
+function talk(){
+let people=[["Elias","Un jeune garde te parle de son premier service.",1],["Mira","Une mécanicienne te montre une pièce d'équipement.",2],["Kael","Un vétéran te teste avec une question sur les remparts.",3]];
+if(G.flags.rivalToma)people.push(["Toma",G.flags.rivalToma==="ally"?"Ton camarade d'entraînement te salue chaleureusement.":"Ton rival te toise avec un sourire narquois.",4]);
+modal("Rencontres",`<div class=choices>${people.map(p=>`<button onclick="meet('${p[0]}')">💬 ${p[0]} — ${p[1]}</button>`).join("")}</div>`);
+}
+function meet(n){
+let lines={Elias:["Tu sembles sérieux. Si tu veux aider, passe au poste demain.","Ne sous-estime jamais une mission simplement parce qu'elle paraît facile."],Mira:["Le matériel doit être entretenu. Une erreur coûte cher.","Si tu trouves des pièces, apporte-les-moi et je pourrai améliorer ton équipement."],Kael:["La force seule ne suffit pas. Observe avant d'agir.","Tu veux servir ? Alors apprends à garder ton calme."],Toma:["On se retrouve à l'arène si tu veux ta revanche.","Ne baisse jamais ta garde devant moi, même entre amis."]};
+G.relations[n]+=2;G.moral=Math.min(100,G.moral+3);addXP(10);G.daily.talk++;G.quest=`Construire ta relation avec ${n}.`;log(`${n} : « ${lines[n][Math.floor(Math.random()*2)]} »`);closeModal();render()
+}
+
+/* ---- Rang & Corps ---- */
+function corpsCeremony(){
+modal("Cérémonie d'affectation",`<div class=notice>Choisis le corps qui définira ta carrière. Ce choix est définitif.</div><div class=choices>${Object.keys(CORPS_DATA).map(c=>`<button onclick="chooseCorps('${c}')">🎖 <b>${c}</b><br><small>${CORPS_DATA[c].desc}</small></button>`).join("")}</div>`);
+}
+function chooseCorps(name){G.corps=name;CORPS_DATA[name].apply();addXP(20);log(`Tu rejoins ${name}.`);closeModal();scene("ch2_after")}
+
+function showEnding(){
+G.flags.finaleDone=true;
+let karma=G.flags.loyalty+(G.flags.savedComrade?2:0)-(G.flags.comradeHurt?1:0)-(G.flags.retreated?1:0)+(G.flags.rescuedMissing?2:0)-(G.flags.abandonedMissing?2:0);
+let title=(G.titan.unlocked&&G.flags.titanKnown)?"Fin : La Légende Redoutée":
+karma>=6?"Fin : Le Héros Loyal des Murs":
+karma<=-6?"Fin : L'Ombre Rebelle":
+karma>=2?"Fin : Le Soldat Respecté":
+karma<=-2?"Fin : Le Marginal des Corps":
+"Fin : Une Vie Parmi Tant d'Autres";
+let corpsLine=G.corps==="Garnison"?"En restant fidèle à la Garnison, tu as choisi la solidité plutôt que l'éclat.":
+G.corps==="Bataillon de Reconnaissance"?"Ton engagement dans le Bataillon de Reconnaissance a fait de toi une figure des expéditions extérieures.":
+G.corps==="Police Militaire"?"Ta carrière au sein de la Police Militaire t'a rapproché des cercles de pouvoir de la capitale.":
+"Sans affectation précise, tu as tracé ta propre voie en marge des corps établis.";
+let loyaltyLine=G.flags.loyalty>=3?"Connu pour ta discipline sans faille, tu incarnes l'ordre établi aux yeux de tes supérieurs.":
+G.flags.loyalty<=-3?"Ta réputation de tête brûlée qui n'obéit qu'à sa conscience te suit désormais partout.":
+"Ni parfaitement obéissant ni ouvertement rebelle, tu as navigué entre les deux.";
+let titanLine=!G.titan.unlocked?"Le secret des titans t'échappe encore — peut-être pour longtemps.":
+G.flags.titanKnown?"Ton pouvoir de titan, assumé publiquement, fait de toi une légende autant qu'une menace aux yeux de certains.":
+"Ton pouvoir de titan reste ton secret le mieux gardé, une bombe à retardement que tu portes seul.";
+let rel=Object.entries(G.relations).sort((a,b)=>b[1]-a[1])[0];
+let relLine=rel[1]>0?`${rel[0]} reste la personne qui compte le plus pour toi dans cette histoire.`:"Tu as gardé tes distances avec presque tout le monde autour de toi.";
+let expLine=G.flags.savedComrade?"On se souvient encore du jour où tu as sauvé un camarade au péril de ta vie.":
+G.flags.comradeHurt?"Le souvenir de ce camarade blessé lors de ta première expédition ne t'a jamais vraiment quitté.":
+G.flags.retreated?"Ton repli lors de ta première expédition a longtemps entaché ta réputation, malgré les vies sauvées.":"";
+let dispLine=G.flags.rescuedMissing?"Le jour où tu as bravé les ordres pour sauver un proche disparu reste l'un de tes actes les plus marquants.":
+G.flags.abandonedMissing?"La disparition que tu n'as jamais pu — ou voulu — empêcher continue de te hanter.":"";
+let hardenLine=G.flags.hardened===true?"Depuis ta première main tachée, tu as choisi l'endurcissement plutôt que le doute.":
+G.flags.hardened===false?"Tu n'as jamais vraiment fait la paix avec la première vie que tu as prise.":"";
+modal(title,`<div class="notice titan"><b>${esc(G.name)}, ${rankTitle()}</b><br><br>${corpsLine} ${loyaltyLine}<br><br>${titanLine}<br><br>${relLine}${expLine?"<br><br>"+expLine:""}${dispLine?"<br><br>"+dispLine:""}${hardenLine?"<br><br>"+hardenLine:""}</div><div class=choices><button class="wide primary" onclick="closeModal();render()">Continuer l'aventure</button></div>`);
+render();
+}
+
+/* ---- Compétences ---- */
+function skillsModal(){
+modal("Compétences",`<p class=sub>Points disponibles : ${G.skillPoints}</p><div class=choices>${Object.keys(PERK_DATA).map(k=>`<button ${G.skillPoints<=0||G.perks[k]>=3?"disabled":""} onclick="upgradePerk('${k}')">${PERK_DATA[k].name} — Nv.${G.perks[k]}/3<br><small>${PERK_DATA[k].desc}</small></button>`).join("")}</div><br><button class="wide" onclick="closeModal()">Fermer</button>`);
+}
+function upgradePerk(k){if(G.skillPoints<=0||G.perks[k]>=3)return;G.skillPoints--;G.perks[k]++;log(`Compétence améliorée : ${PERK_DATA[k].name}.`);skillsModal();render()}
+
+/* ---- Missions ---- */
+function missionBoard(){
+let missions=[
+["Livraison aux remparts","Apporte un colis au poste de garde.",20,35],
+["Patrouille urbaine","Accompagne une patrouille dans les rues.",35,55],
+["Inspection du mur","Observe une section du rempart avec un supérieur.",45,70],
+["Reconnaissance extérieure","Mission risquée à la lisière de la forêt.",70,100]
+];
+modal("Bureau des missions",`<div class=notice>Les missions les plus risquées demandent davantage de courage et de niveau.</div><div class=choices>${missions.map((m,i)=>`<button onclick="acceptMission(${i})">📜 <b>${m[0]}</b><br><small>${m[1]} • Récompense ${m[3]}₤</small></button>`).join("")}</div>`);
+window._missions=missions;
+}
+function acceptMission(i){let m=window._missions[i];if(i>=2&&(G.level<2||G.courage<5)){alert("Ton niveau ou ton courage est insuffisant pour cette mission.");return}G.mission={name:m[0],desc:m[1],steps:0,xp:m[2],money:m[3],risk:i};G.quest=m[1];closeModal();log(`Mission acceptée : ${m[0]}.`);render()}
+function missionStep(){
+let m=G.mission;if(!m)return;
+advance(1);
+if(m.steps<2){m.steps++;addXP(12);log(`Étape ${m.steps}/2 : ${m.desc}`);render();return}
+let chance=55+G.courage*6+G.agility*3-m.risk*18+G.intel*2+G.perks.precision*7+G.perks.instinct*2;
+if(G.corps==="Bataillon de Reconnaissance")chance+=5;
+let reward=m.money+(G.corps==="Police Militaire"?15:0);
+if(Math.random()*100<chance){G.money+=reward;G.reputation+=2+m.risk;addXP(m.xp);log(`Mission réussie : ${m.name}. Récompense +${reward}₤.`);G.mission=null;G.quest=null}
+else{let dmg=Math.round((8+m.risk*8)*(1-G.perks.sangfroid*0.10));G.hp=Math.max(1,G.hp-dmg);G.moral=Math.max(0,G.moral-5);log("La mission tourne mal. Tu dois battre en retraite et revoir ta préparation.");G.mission=null}
+render()
+}
+
+/* ---- Quêtes quotidiennes ---- */
+function dailyModal(){
+let tasks=[["train","S'entraîner 1 fois",1,15,20],["explore","Explorer 2 fois",2,10,15],["talk","Parler à 1 habitant",1,10,15]];
+modal("Quêtes quotidiennes",`<div class=choices>${tasks.map(t=>{
+let done=G.daily[t[0]]>=t[2];let claimed=G.daily.claimed.includes(t[0]);
+return `<div class=item><span>${t[1]} (${Math.min(G.daily[t[0]],t[2])}/${t[2]})</span><button ${!done||claimed?"disabled":""} onclick="claimDaily('${t[0]}',${t[3]},${t[4]})">${claimed?"✔ Réclamé":"Réclamer"}</button></div>`;
+}).join("")}</div><br><button class="wide" onclick="closeModal()">Fermer</button>`);
+}
+function claimDaily(key,money,xp){if(G.daily.claimed.includes(key))return;G.daily.claimed.push(key);G.money+=money;addXP(xp);log(`Quête quotidienne accomplie : +${money}₤.`);dailyModal();render()}
+
+/* ---- Arène ---- */
+function arenaModal(){
+let opps=[{n:"Recrue Dana",p:G.level*3+5,r:0},{n:"Soldat Ilse",p:G.level*4+10,r:1},{n:"Vétéran Toma",p:G.level*5+18,r:2}];
+window._arena=opps;
+modal("Arène d'entraînement",`<div class=notice>Duels amicaux entre soldats. Coûte 15 endurance.</div><div class=choices>${opps.map((o,i)=>`<button onclick="arenaFight(${i})">⚔ ${o.n}</button>`).join("")}</div>`);
+}
+function arenaFight(i){
+let o=window._arena[i];if(G.stamina<15){alert("Trop fatigué pour combattre.");return}
+G.stamina-=15;let power=G.force*3+G.agility*2+G.courage+G.perks.instinct*2+Math.random()*15;
+closeModal();
+if(power>o.p){let rew=10+i*8;G.money+=rew;G.reputation++;addXP(15+i*5);log(`Victoire en duel contre ${o.n}. +${rew}₤.`);}
+else{let dmg=Math.round(10*(1-G.perks.sangfroid*0.10));G.hp=Math.max(1,G.hp-dmg);G.moral=Math.max(0,G.moral-2);log(`Défaite face à ${o.n}. Tu t'entraîneras plus dur.`);}
+render();
+}
+
+/* ---- Pouvoir Titan ---- */
+function maybeWildTitan(){
+let night=(G.time>=20||G.time<6);
+let base=G.place==="Forêt extérieure"?0.35:(G.place==="Remparts"?0.12:0);
+if(night)base+=0.15;
+if(Math.random()<base){wildTitanEncounter();return true}
+return false;
+}
+function postAction(){if(!maybeWildTitan())randomEvent()}
+function tierName(t){return ["Titan chétif","Titan agile","Titan blindé","Titan colossal","Titan anormal"][Math.min(t-1,4)]}
+function wildTitanEncounter(){
+let tier=1+Math.floor(G.level/4)+Math.floor(Math.random()*2);
+window._titanFight={tier,hp:40+tier*25,name:tierName(tier)};
+modal("Titan errant !",`<div class="notice titan">Une silhouette immense émerge de la brume. Un ${window._titanFight.name} approche.</div><div class=choices>
+<button class=primary onclick="titanFight(false)">⚔ Combattre</button>
+${G.titan.unlocked&&G.titan.energy>=30?'<button class=titan onclick="titanFight(true)">🧬 Se transformer et combattre</button>':""}
+<button class="danger" onclick="titanFlee()">🏃 Fuir</button></div>`);
+}
+function titanFight(transform){
+let f=window._titanFight;let power;
+if(transform){G.titan.active=true;G.titan.energy-=30;power=40+G.force*4+G.titan.mass*10+G.perks.sangfroid*5}
+else{power=10+G.force*2+G.agility*1.5+(G.weapon&&G.weapon!=="Aucun"?8:0)+G.perks.instinct*2}
+if(G.corps==="Bataillon de Reconnaissance")power+=8;
+let roll=power+Math.random()*20-f.hp*0.4;
+closeModal();
+if(roll>0){
+let rew=20+f.tier*15;G.money+=rew;let xpgain=30+f.tier*20;addXP(xpgain);G.reputation+=2+f.tier;G.titan.kills++;
+log(`Titan vaincu (${f.name}) ! +${rew}₤, ta réputation grandit.`);
+if(!G.titan.unlocked&&G.titanQuest===0&&Math.random()<0.8){G.titanQuest=1;G.quest="Un fragment cristallin est resté sur le corps du titan. Que signifie-t-il ?";log("Tu récupères un étrange fragment cristallin sur la nuque du titan vaincu.");}
+}else{
+let dmg=Math.round((15+f.tier*10)*(1-G.perks.sangfroid*0.10));G.hp=Math.max(1,G.hp-dmg);G.moral=Math.max(0,G.moral-8);
+log(`Le combat tourne mal face au ${f.name}. Tu bats en retraite, blessé.`);
+}
+if(transform){if(G.titan.energy<=0){G.titan.energy=0;G.moral=Math.max(0,G.moral-10);log("Tu perds le contrôle un instant avant de reprendre forme humaine, épuisé.")}G.titan.active=false}
+if(roll>0&&!G.flags.firstKillDone){G.flags.firstKillDone=true;render();scene("chFK_reflect");return}
+render();
+}
+function titanFlee(){closeModal();G.stamina=Math.max(0,G.stamina-15);log("Tu fuis prudemment, le cœur battant.");render()}
+function meditate(){
+if(G.courage<6){log("Tu ressens une chaleur étrange mais rien ne se produit encore. Peut-être dois-tu être plus courageux.");render();return}
+advance(2);
+modal("Éveil",`<div class="notice titan">Une chaleur irradie sous ta peau. Une force ancienne semble répondre à ton appel...</div><div class=choices><button class=titan onclick="awaken()">Accepter le pouvoir</button><button onclick="closeModal()">Reculer</button></div>`);
+}
+function awaken(){G.titanQuest=2;G.titan.unlocked=true;G.moral=Math.min(100,G.moral+5);log("Le fragment se dissout en toi. Tu viens d'éveiller un pouvoir de titan.");closeModal();scene("ch4_reveal")}
+function titanPanelModal(){
+modal("Pouvoir Titan",`<div class="notice titan">Énergie : ${Math.round(G.titan.energy)}/${G.titan.maxenergy} • Masse : ${G.titan.mass.toFixed(1)} • Titans vaincus : ${G.titan.kills}</div><div class=choices>
+<button class=titan ${G.titan.energy<20?"disabled":""} onclick="titanTrain()">🔥 S'entraîner en forme titan (-20 énergie)</button>
+<button onclick="closeModal()">Fermer</button></div>`);
+}
+function titanTrain(){if(G.titan.energy<20)return;G.titan.energy-=20;G.titan.mass+=0.2;addXP(25);G.force++;log("Séance d'entraînement en forme titan. Ta masse et ta force augmentent.");closeModal();render()}
+
+/* ---- Marché ---- */
+function shop(){modal("Marché",`<div class=choices>
+<button onclick="buy('Bandage',15)">🩹 Bandage — 15₤</button>
+<button onclick="buy('Ration',10)">🥖 Ration — 10₤</button>
+<button onclick="buy('Potion de moral',25)">🍵 Potion de moral — 25₤</button>
+<button onclick="buy('Lame d\'entraînement',45)">⚔ Lame d'entraînement — 45₤</button>
+<button onclick="buy('Veste renforcée',60)">🧥 Veste renforcée — 60₤</button>
+<button onclick="buy('Équipement 3D amélioré',120)">🎯 Équipement 3D amélioré — 120₤</button>
+</div>`)}
+function buy(item,cost){if(G.money<cost){alert("Pas assez d'argent.");return}G.money-=cost;G.inventory.push(item);if(item==="Lame d'entraînement")G.force++;if(item==="Veste renforcée")G.maxhp+=10;if(item==="Équipement 3D amélioré")G.agility+=2;log(`Achat : ${item}.`);closeModal();render()}
+function useItem(i){let x=G.inventory[i];if(x==="Bandage"){G.hp=Math.min(G.maxhp,G.hp+30);G.inventory.splice(i,1);log("Tu utilises un bandage et récupères des PV.")}else if(x==="Ration"||x==="Petite ration"){G.stamina=Math.min(G.maxstamina,G.stamina+35);G.inventory.splice(i,1);log("Tu manges une ration et récupères de l'endurance.")}else if(x==="Potion de moral"){G.moral=Math.min(100,G.moral+20);G.inventory.splice(i,1);log("Tu bois la potion : ton moral remonte.")}else{log(`${x} est équipé.`);G.weapon=x}render()}
+function randomEvent(){
+let r=Math.random();
+if(r<.12){microEvent();return}
+if(r>=.32)return;
+let r2=Math.random();
+if(r2<.25){G.money+=15;log("Tu retrouves quelques pièces près d'un étal.");}
+else if(r2<.5){G.reputation++;log("Tu aides un habitant : ta réputation augmente.");}
+else if(r2<.75){G.moral=Math.max(0,G.moral-3);log("Une rumeur inquiétante circule en ville.");}
+else{G.inventory.push("Petite ration");log("Un habitant te remercie et te donne une ration.");}
+}
+function saveGame(){localStorage.setItem(KEY,JSON.stringify(G));log("Sauvegarde effectuée.");render()}
+function loadGame(){let s=localStorage.getItem(KEY);if(!s){alert("Aucune sauvegarde.");return}G=JSON.parse(s);log("Sauvegarde chargée.");render()}
+function resetGame(){if(confirm("Recommencer ?")){localStorage.removeItem(KEY);location.reload()}}
+document.getElementById("modal").addEventListener("click",e=>{if(e.target.id==="modal")closeModal()});
+render();
+</script>
+</body>
+</html>
